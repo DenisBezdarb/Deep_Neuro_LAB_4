@@ -2,6 +2,30 @@ import torch
 import torch.nn as nn
 import pandas as pd
 
+class ClassificationNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layers = nn.Sequential(nn.Linear(2, 5),
+            nn.Tanh(),
+            nn.Linear(5, 1),
+            nn.Sigmoid()
+        )
+    
+    def forward(self, x):
+        return self.layers(x)
+
+class RegressionNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(1, 10),
+            nn.ReLU(),
+            nn.Linear(10, 1)
+        )
+    
+    def forward(self, x):
+        return self.layers(x)
+
 n = 12
 df = pd.read_csv('dataset_simple.csv')
 if n % 2 == 1:
@@ -9,18 +33,6 @@ if n % 2 == 1:
     X = torch.Tensor(df[['age', 'income']].values)
     y = torch.Tensor(df['will_buy'].values).view(-1, 1)
 
-    class ClassificationNet(nn.Module):
-        def __init__(self):
-            super().__init__()
-            self.layers = nn.Sequential(nn.Linear(2, 5),
-                nn.Tanh(),
-                nn.Linear(5, 1),
-                nn.Sigmoid()
-            )
-        
-        def forward(self, x):
-            return self.layers(x)
-    
     model = ClassificationNet()
     loss_fn = nn.BCELoss()
     task_type = 'classification'
@@ -33,18 +45,6 @@ else:
     X = (X - X.mean()) / X.std()
     y = (y - y.mean()) / y.std()
 
-    class RegressionNet(nn.Module):
-        def __init__(self):
-            super().__init__()
-            self.layers = nn.Sequential(
-                nn.Linear(1, 10),
-                nn.ReLU(),
-                nn.Linear(10, 1)
-            )
-        
-        def forward(self, x):
-            return self.layers(x)
-    
     model = RegressionNet()
     loss_fn = nn.MSELoss()
     task_type = 'regression'
